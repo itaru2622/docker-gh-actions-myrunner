@@ -13,8 +13,11 @@ echo "script kicked >>>>>>>>>>>>>>>>>>>>>>>"
 echo "$0 $@"
 echo "script kicked <<<<<<<<<<<<<<<<<<<<<<<"
 
-echo "env: excepts sensitive(pass|token|pat)-----------------------"
-env | sort -u -f | grep -i -v -e pass -e token -e pat
+echo "env: excepts sensitive(pass|token|pat|cred)-----------------------"
+env | sort -u -f | grep -i -v -e pass -e token -e pat -e cred
+
+echo "env: sensitive(pass|token|pat|cred)-----------------------"
+env | sort -u -f | grep -i -e pass -e token -e pat -e cred | awk -F= '{print $1 "=****"}'
 
 echo "files: ${PWD} -----------------------"
 ls -lrta
