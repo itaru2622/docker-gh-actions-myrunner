@@ -43,29 +43,27 @@ cmd ?=make bootRunner -C /work
 build:
 	docker build --build-arg base=${base} --build-arg runner_dir=${runner_dir} -t ${img} .
 
-# start container; /sbin/init with DinD (isolated; no shar for docker.socket)
+# start container; systemd for DinD (isolated; no shar for docker.socket)
 # SAMPLE: make startContainerWithSystemd   rTarget=     GH_PAT=
+#       -e ACTIONS_RUNNER_HOOK_JOB_STARTED=/work/hooks/job-started.sh -e ACTIONS_RUNNER_HOOK_JOB_COMPLETED=/work/hooks/job-completed.sh
 startContainerWithSystemd:
 	docker run --name ${cName} --hostname ${cName} -d --restart always --user root  --privileged \
-	-e ACTIONS_RUNNER_HOOK_JOB_STARTED=/work/hooks/job-started.sh \
-	-e ACTIONS_RUNNER_HOOK_JOB_COMPLETED=/work/hooks/job-completed.sh  \
 	-e ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT=${ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT} \
 	-e RUNNER_ALLOW_RUNASROOT=${RUNNER_ALLOW_RUNASROOT} \
 	-e GH_PAT=${GH_PAT} \
-	-e rTarget=${rTarget}  -e rScope=${rScope} \
+	-e rTarget=${rTarget} -e rScope=${rScope} -e rName=${rName} -e label=${label} -e rGroup=${rGroup} \
 	-v ${wDir}:/work \
-	${img} /sbin/init
+	${img} /lib/systemd/systemd --show-status=true
 
 # start container; without systemd
 # SAMPLE: make startContainer  rTarget=     GH_PAT=
+#       -e ACTIONS_RUNNER_HOOK_JOB_STARTED=/work/hooks/job-started.sh -e ACTIONS_RUNNER_HOOK_JOB_COMPLETED=/work/hooks/job-completed.sh
 startContainer:
 	docker run --name ${cName} --hostname ${cName} -d --restart always \
-        -e ACTIONS_RUNNER_HOOK_JOB_STARTED=/work/hooks/job-started.sh \
-        -e ACTIONS_RUNNER_HOOK_JOB_COMPLETED=/work/hooks/job-completed.sh  \
 	-e ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT=${ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT} \
 	-e RUNNER_ALLOW_RUNASROOT=${RUNNER_ALLOW_RUNASROOT} \
 	-e GH_PAT=${GH_PAT} \
-	-e rTarget=${rTarget}  -e rScope=${rScope} \
+	-e rTarget=${rTarget} -e rScope=${rScope} -e rName=${rName} -e label=${label} -e rGroup=${rGroup} \
         -v ${wDir}:/work \
         ${img} ${cmd}
 
@@ -81,7 +79,7 @@ bash:
 
 # ops within runner container: >>>>>>>
 
-bootRunner: login config _run _fakeDaemon
+bootRunner: login config _runFG
 
 # gh login/logout
 # SAMPLE: make login
@@ -104,7 +102,7 @@ runnerStop:  unconfig _kill
 config:
 	$(eval url=${rURL})
 	$(eval token=$(shell gh api --method POST ${rAPI}/registration-token | jq -r '.token'))
-	(cd ${runner_dir}; config.sh --url ${url} --token ${token} --replace --name ${rName} --labels ${label} --runnergroup ${rGroup} --no-default-labels --disableupdate --unattended )
+	(cd ${runner_dir}; config.sh --url ${url} --token ${token} --replace --name ${rName} --labels ${label} --runnergroup ${rGroup} --no-default-labels --disableupdate --unattended --ephemeral )
 	-(cd ${runner_dir}; sudo ./svc.sh install runner )
 
 # SAMPLE: make unconfig
@@ -116,9 +114,9 @@ unconfig:
 _runsvc:
 	(cd ${runner_dir}; sudo ./svc.sh start )
 _run:
-	(cd ${runner_dir}; ./run.sh & )
+	(cd ${runner_dir}; ./run.sh --ephemeral & )
 _runFG:
-	(cd ${runner_dir}; ./run.sh )
+	(cd ${runner_dir}; ./run.sh --ephemeral )
 _fakeDaemon:
 	tail -f /dev/null
 
