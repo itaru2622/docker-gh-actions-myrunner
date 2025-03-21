@@ -54,11 +54,28 @@ make login config _runsvc
 
 ## hacks
 
-1) hooks before/after a job
+1) garbage collection in runner.
 
-both of ACTIONS_RUNNER_HOOK_JOB_STARTED and ACTIONS_RUNNER_HOOK_JOB_COMPLETED bounded to
-hooks/{job-started.sh, job-completed.sh} respectively.
-those two scripts load and kick hooks/scripts.d/*-{pre|post}*.sh to handle specific garbage collection.
+in default, runner doesn't cleanup any garbage collection after job/workflow finished.
+it means potential security risk, one can see other's data including credential when workflow invloving login to CI/CD sub system.
+
+there are two choice for garbage collecting.
+
+choice 1) use ephemeral option at config.sh and run.sh.
+
+this ephemeral option simply makes run.sh died at the end of every job, even workflow has multiple jobs.
+all it needs to start runner container with 'docker run --restart always' without any volume mount.
+then the new runner instance will be created with fresh dist and able to handle next job.
+
+this choice may have limitations:
+not sure what happens when workflow request to share the data between jobs, by https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/passing-information-between-jobs
+
+choice 2) use hooks before/after a job
+
+if runner needs to handle multiple jobs in its life cycle, it needs to use hook for clearing garbage.
+set env ACTIONS_RUNNER_HOOK_JOB_STARTED and ACTIONS_RUNNER_HOOK_JOB_COMPLETED to hooks/{job-started.sh, job-completed.sh} respectively.
+the sample is stored in hooks folder, which passes request to underlying hooks/scripts.d/*-{pre|post}*.sh to handle specific garbage collection.
+note that it is difficult to figure out what to clean or keep, since it is depends on user defined content(step/job/workflow/sequence)
 
 
 ## Rerefences
