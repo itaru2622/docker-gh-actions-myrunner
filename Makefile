@@ -79,7 +79,7 @@ bash:
 
 # ops within runner container: >>>>>>>
 
-bootRunner: login config _runFG
+bootRunner: login config _runFG unconfig
 
 # gh login/logout
 # SAMPLE: make login
