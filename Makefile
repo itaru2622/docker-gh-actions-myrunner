@@ -1,5 +1,5 @@
 SHELL  =/bin/bash
-img   ?=itaru2622/gh-actions-myrunner-ubuntu:24.04
+img   ?=itaru2622/gh-actions-myrunner:ubuntu24.04
 base  ?=ubuntu:24.04
 cName ?=gh-action-runner
 
@@ -40,8 +40,13 @@ runner_dir ?=/opt/gh-action-runner
 
 cmd ?=make bootRunner -C /work
 
+# tool versions(tags) to use
+runner_ver ?=$(shell curl -sL https://api.github.com/repos/actions/runner/releases/latest                 | grep tag_name | cut -d '"' -f 4 | sed 's/^v//')
+hook_ver   ?=$(shell curl -sL https://api.github.com/repos/actions/runner-container-hooks/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/^v//')
+mgc_ver    ?=$(shell curl -sL https://api.github.com/repos/microsoftgraph/msgraph-cli/releases/latest     | grep tag_name | cut -d '"' -f 4 | sed 's/^v//')
+
 build:
-	docker build --build-arg base=${base} --build-arg runner_dir=${runner_dir} -t ${img} .
+	docker build --build-arg base=${base} --build-arg runner_ver=${runner_ver} --build-arg hook_ver=${hook_ver} --build-arg mgc_ver=${mgc_ver} --build-arg runner_dir=${runner_dir} -t ${img} .
 
 # start container; systemd for DinD (isolated; no shar for docker.socket)
 # SAMPLE: make startContainerWithSystemd   rTarget=     GH_PAT=
