@@ -24,11 +24,24 @@ make build
 make startContainer rTarget=ORG/REPO GH_PAT=your_GITHUB_PersonalAccessToken
 ```
 
-2b) start step-by-step
+2b) start container with dockerd, required to make runner support docker tasks.
+
+this usecase is under developing, yet.
 
 ```bash
-# start container
+# boot container with dockerd
+make startContainerWithDockerd rTarget=ORG/REPO GH_PAT=your_GITHUB_PAT
+```
+
+2c) start step-by-step for debug
+
+```bash
+# start container (at host)
 make startContainer rTarget=ORG/REPO GH_PAT=your_GITHUB_PersonalAccessToken cmd='tail -f /dev/null'
+
+# ops in container /work folder >>>>>>>>>>
+# start dockerd (optional)
+make _startDiD
 
 # login to github for getting token to register runner into github.
 make login
@@ -37,20 +50,20 @@ make login
 make config
 
 # start runner process.
-make _run
+make _runFG
+
+# to stop runner, CTRL-C
+
+# stop dockerd (optional)
+make _cleanupDiD
+# ops in container /work folder <<<<<<<<<<
+
+# stop container (at host)
+make stopContainer
+
+
 ```
 
-2c) start container with systemd, required to make runner support docker tasks.
-
-this usecase is under developing, yet.
-
-```bash
-# boot container with systemd
-make startContainerWithSystemd rTarget=ORG/REPO GH_PAT=your_GITHUB_PAT
-
-# login, configure, and start runner as service.
-make login config _runsvc
-```
 
 ## hacks
 
