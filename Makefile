@@ -85,18 +85,24 @@ bash:
 # ops within runner container: >>>>>>>
 
 bootRunner: login config _runFG unconfig logout
-bootRunnerDinD:: _startDiD
-	make login config _runFG unconfig logout _cleanupDiD
-_startDiD:
+bootRunnerDinD:: _startDiD _waitforDockerd login config _runFG unconfig logout _cleanupDiD
+
+_startDiD: /var/run/docker.sock
+/var/run/docker.sock:
 	sudo /usr/bin/dockerd &
+_waitforDockerd:
+	sleep 3
+	/work/waitforDockerd.sh
 _cleanupDiD:
 	-docker ps -qa | xargs docker rm -f
 	-docker images -qa | xargs docker rmi -f
 	-docker system prune -f
 	-docker volume prune -f
 	-docker network prune -f
-	-pkill -9 /usr/bin/dockerd
-	-rm -f /var/run/docker.pid
+	-sudo pkill -f /usr/bin/dockerd
+	-sudo rm -f /var/run/docker.pid /var/run/docker.sock
+	sync
+	sleep 2
 
 # gh login/logout
 # SAMPLE: make login
