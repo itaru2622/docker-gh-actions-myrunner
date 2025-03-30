@@ -48,19 +48,19 @@ mgc_ver    ?=$(shell curl -sL https://api.github.com/repos/microsoftgraph/msgrap
 build:
 	docker build --build-arg base=${base} --build-arg runner_ver=${runner_ver} --build-arg hook_ver=${hook_ver} --build-arg mgc_ver=${mgc_ver} --build-arg runner_dir=${runner_dir} -t ${img} .
 
-# start container; systemd for DinD (isolated; no shar for docker.socket)
-# SAMPLE: make startContainerWithSystemd   rTarget=     GH_PAT=
+# start container; dockerd for DinD (isolated; no share for docker.socket)
+# SAMPLE: make startContainerWithDockerd   rTarget=     GH_PAT=
 #       -e ACTIONS_RUNNER_HOOK_JOB_STARTED=/work/hooks/job-started.sh -e ACTIONS_RUNNER_HOOK_JOB_COMPLETED=/work/hooks/job-completed.sh
-startContainerWithSystemd:
+startContainerWithDockerd:
 	docker run --name ${cName} --hostname ${cName} -d --restart always --user root  --privileged \
 	-e ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT=${ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT} \
 	-e RUNNER_ALLOW_RUNASROOT=${RUNNER_ALLOW_RUNASROOT} \
 	-e GH_PAT=${GH_PAT} \
 	-e rTarget=${rTarget} -e rScope=${rScope} -e rName=${rName} -e label=${label} -e rGroup=${rGroup} \
-	-v ${wDir}:/work \
-	${img} /lib/systemd/systemd --show-status=true
+	-v ${wDir}:/work:ro \
+	${img} make bootRunnerDinD -C /work
 
-# start container; without systemd
+# start container; without dockerd
 # SAMPLE: make startContainer  rTarget=     GH_PAT=
 #       -e ACTIONS_RUNNER_HOOK_JOB_STARTED=/work/hooks/job-started.sh -e ACTIONS_RUNNER_HOOK_JOB_COMPLETED=/work/hooks/job-completed.sh
 startContainer:
@@ -69,7 +69,7 @@ startContainer:
 	-e RUNNER_ALLOW_RUNASROOT=${RUNNER_ALLOW_RUNASROOT} \
 	-e GH_PAT=${GH_PAT} \
 	-e rTarget=${rTarget} -e rScope=${rScope} -e rName=${rName} -e label=${label} -e rGroup=${rGroup} \
-        -v ${wDir}:/work \
+        -v ${wDir}:/work:ro \
         ${img} ${cmd}
 
 # stop container
@@ -84,7 +84,19 @@ bash:
 
 # ops within runner container: >>>>>>>
 
-bootRunner: login config _runFG unconfig
+bootRunner: login config _runFG unconfig logout
+bootRunnerDinD:: _startDiD
+	make login config _runFG unconfig logout _cleanupDiD
+_startDiD:
+	sudo /usr/bin/dockerd &
+_cleanupDiD:
+	-docker ps -qa | xargs docker rm -f
+	-docker images -qa | xargs docker rmi -f
+	-docker system prune -f
+	-docker volume prune -f
+	-docker network prune -f
+	-pkill -9 /usr/bin/dockerd
+	-rm -f /var/run/docker.pid
 
 # gh login/logout
 # SAMPLE: make login
