@@ -68,3 +68,6 @@ RUN deluser  --remove-home --remove-all-files ubuntu; delgroup ubuntu; \
     echo "set mouse-=a" > /home/${uname}/.vimrc; \
     chown -R ${uname}:${uname} /home/${uname} ${runner_dir} ${RUNNER_TOOL_CACHE}
 USER ${uname}
+
+COPY . /work
+WORKDIR /work
