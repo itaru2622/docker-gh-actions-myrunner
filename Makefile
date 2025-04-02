@@ -84,7 +84,7 @@ bash:
 
 # ops within runner container: >>>>>>>
 
-bootRunner: login config _runFG unconfig logout
+bootRunner: config _runFG unconfig
 bootRunnerDinD:: _startDiD _waitforDockerd bootRunner _cleanupDiD
 
 _startDiD: /var/run/docker.sock
@@ -122,17 +122,21 @@ runnerStop:  unconfig _kill
 #runnerStop: unconfig _killsvc 
 
 # SAMPLE: make config
-config:
+config:: login
+config::
 	$(eval url=${rURL})
 	$(eval token=$(shell gh api --method POST ${rAPI}/registration-token | jq -r '.token'))
 	(cd ${runner_dir}; config.sh --url ${url} --token ${token} --replace --name ${rName} --labels ${label} --runnergroup ${rGroup} --no-default-labels --disableupdate --unattended --ephemeral )
 	-(cd ${runner_dir}; sudo ./svc.sh install runner )
+config:: logout
 
 # SAMPLE: make unconfig
-unconfig:
+unconfig:: login
+unconfig::
 	-(cd ${runner_dir}; sudo ./svc.sh uninstall; rm -f ./svc.sh )
 	$(eval token=$(shell gh api --method POST ${rAPI}/remove-token | jq -r '.token'))
 	(cd ${runner_dir}; ./config.sh remove --token ${token} )
+unconfig:: logout
 
 _runsvc:
 	(cd ${runner_dir}; sudo ./svc.sh start )
