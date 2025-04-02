@@ -85,7 +85,7 @@ bash:
 # ops within runner container: >>>>>>>
 
 bootRunner: login config _runFG unconfig logout
-bootRunnerDinD:: _startDiD _waitforDockerd login config _runFG unconfig logout _cleanupDiD
+bootRunnerDinD:: _startDiD _waitforDockerd bootRunner _cleanupDiD
 
 _startDiD: /var/run/docker.sock
 /var/run/docker.sock:
