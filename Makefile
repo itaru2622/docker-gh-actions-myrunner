@@ -34,11 +34,11 @@ RUNNER_ALLOW_RUNASROOT ?=false
 ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT ?=1
 
 # dirs
-wDir       ?=${PWD}
+wDir       ?=$(shell pwd)
 runner_dir ?=/opt/gh-action-runner
 
 
-cmd ?=make bootRunner -C /work
+cmd ?=make bootRunner
 
 # tool versions(tags) to use
 runner_ver ?=$(shell curl -sL https://api.github.com/repos/actions/runner/releases/latest                 | grep tag_name | cut -d '"' -f 4 | sed 's/^v//')
@@ -57,8 +57,8 @@ startContainerWithDockerd:
 	-e RUNNER_ALLOW_RUNASROOT=${RUNNER_ALLOW_RUNASROOT} \
 	-e GH_PAT_RUNNER=${GH_PAT_RUNNER} \
 	-e rTarget=${rTarget} -e rScope=${rScope} -e rName=${rName} -e label=${label} -e rGroup=${rGroup} \
-	-v ${wDir}:/work:ro \
-	${img} make bootRunnerDinD -C /work
+	-v ${wDir}:/work:ro -w /work \
+	${img} make bootRunnerDinD
 
 # start container; without dockerd
 # SAMPLE: make startContainer  rTarget=     GH_PAT_RUNNER=
@@ -69,7 +69,7 @@ startContainer:
 	-e RUNNER_ALLOW_RUNASROOT=${RUNNER_ALLOW_RUNASROOT} \
 	-e GH_PAT_RUNNER=${GH_PAT_RUNNER} \
 	-e rTarget=${rTarget} -e rScope=${rScope} -e rName=${rName} -e label=${label} -e rGroup=${rGroup} \
-        -v ${wDir}:/work:ro \
+        -v ${wDir}:/work:ro -w /work \
         ${img} ${cmd}
 
 # stop container
@@ -80,7 +80,7 @@ stopContainer:
 # exec bash in container
 # SAMPLE: make bash
 bash:
-	docker exec -it -u runner -w /work ${cName} /bin/bash
+	docker exec -it ${cName} /bin/bash
 
 # ops within runner container: >>>>>>>
 
@@ -92,7 +92,7 @@ _startDiD: /var/run/docker.sock
 	sudo /usr/bin/dockerd &
 _waitforDockerd:
 	sleep 3
-	/work/waitforDockerd.sh
+	${wDir}/waitforDockerd.sh
 _cleanupDiD:
 	-docker ps -qa | xargs docker rm -f
 	-docker images -qa | xargs docker rmi -f
