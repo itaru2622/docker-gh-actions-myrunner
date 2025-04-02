@@ -52,7 +52,7 @@ build:
 # SAMPLE: make startContainerWithDockerd   rTarget=     GH_PAT=
 #       -e ACTIONS_RUNNER_HOOK_JOB_STARTED=/work/hooks/job-started.sh -e ACTIONS_RUNNER_HOOK_JOB_COMPLETED=/work/hooks/job-completed.sh
 startContainerWithDockerd:
-	docker run --name ${cName} --hostname ${cName} -d --restart always --user root  --privileged \
+	docker run --name ${cName} --hostname ${cName} -d --restart always --privileged \
 	-e ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT=${ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT} \
 	-e RUNNER_ALLOW_RUNASROOT=${RUNNER_ALLOW_RUNASROOT} \
 	-e GH_PAT=${GH_PAT} \
