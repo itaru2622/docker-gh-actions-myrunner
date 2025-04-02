@@ -4,7 +4,7 @@ base  ?=ubuntu:24.04
 cName ?=gh-action-runner
 
 # personal access token for gh login, neeeded to onDemand exection outside github actions
-GH_PAT ?=changeme
+GH_PAT_RUNNER ?=changeme
 
 # params for configure.sh, registering this runner into github.
 #   rName: runner Name to register github.
@@ -49,25 +49,25 @@ build:
 	docker build --build-arg base=${base} --build-arg runner_ver=${runner_ver} --build-arg hook_ver=${hook_ver} --build-arg mgc_ver=${mgc_ver} --build-arg runner_dir=${runner_dir} -t ${img} .
 
 # start container; dockerd for DinD (isolated; no share for docker.socket)
-# SAMPLE: make startContainerWithDockerd   rTarget=     GH_PAT=
+# SAMPLE: make startContainerWithDockerd   rTarget=     GH_PAT_RUNNER=
 #       -e ACTIONS_RUNNER_HOOK_JOB_STARTED=/work/hooks/job-started.sh -e ACTIONS_RUNNER_HOOK_JOB_COMPLETED=/work/hooks/job-completed.sh
 startContainerWithDockerd:
 	docker run --name ${cName} --hostname ${cName} -d --restart always --privileged \
 	-e ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT=${ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT} \
 	-e RUNNER_ALLOW_RUNASROOT=${RUNNER_ALLOW_RUNASROOT} \
-	-e GH_PAT=${GH_PAT} \
+	-e GH_PAT_RUNNER=${GH_PAT_RUNNER} \
 	-e rTarget=${rTarget} -e rScope=${rScope} -e rName=${rName} -e label=${label} -e rGroup=${rGroup} \
 	-v ${wDir}:/work:ro \
 	${img} make bootRunnerDinD -C /work
 
 # start container; without dockerd
-# SAMPLE: make startContainer  rTarget=     GH_PAT=
+# SAMPLE: make startContainer  rTarget=     GH_PAT_RUNNER=
 #       -e ACTIONS_RUNNER_HOOK_JOB_STARTED=/work/hooks/job-started.sh -e ACTIONS_RUNNER_HOOK_JOB_COMPLETED=/work/hooks/job-completed.sh
 startContainer:
 	docker run --name ${cName} --hostname ${cName} -d --restart always \
 	-e ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT=${ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT} \
 	-e RUNNER_ALLOW_RUNASROOT=${RUNNER_ALLOW_RUNASROOT} \
-	-e GH_PAT=${GH_PAT} \
+	-e GH_PAT_RUNNER=${GH_PAT_RUNNER} \
 	-e rTarget=${rTarget} -e rScope=${rScope} -e rName=${rName} -e label=${label} -e rGroup=${rGroup} \
         -v ${wDir}:/work:ro \
         ${img} ${cmd}
@@ -107,7 +107,7 @@ _cleanupDiD:
 # gh login/logout
 # SAMPLE: make login
 login:
-	@echo ${GH_PAT} | gh auth login --with-token
+	@echo ${GH_PAT_RUNNER} | gh auth login --with-token
 	-gh auth status
 # SAMPLE: make logout
 logout:
