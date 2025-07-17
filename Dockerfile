@@ -14,9 +14,9 @@ RUN apt update; apt install -y curl unzip gnupg
 ARG runner_dir=/opt/gh-action-runner
 WORKDIR ${runner_dir}
 
-ARG runner_ver=2.322.0
+ARG runner_ver=2.326.0
 RUN curl -L https://github.com/actions/runner/releases/download/v${runner_ver}/actions-runner-linux-x64-${runner_ver}.tar.gz  -o /tmp/actions-runner.tgz;
-ARG hook_ver=0.6.2
+ARG hook_ver=0.7.0
 RUN curl -L https://github.com/actions/runner-container-hooks/releases/download/v${hook_ver}/actions-runner-hooks-docker-${hook_ver}.zip -o /tmp/runner-container-hooks.zip
 RUN tar zxvf /tmp/actions-runner.tgz; \
     unzip /tmp/runner-container-hooks.zip -d ${runner_dir}/runner-container-hooks-docker; \
