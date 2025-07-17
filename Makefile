@@ -47,7 +47,7 @@ hook_ver   ?=$(shell curl -sL https://api.github.com/repos/actions/runner-contai
 mgc_ver    ?=$(shell curl -sL https://api.github.com/repos/microsoftgraph/msgraph-cli/releases/latest     | grep tag_name | cut -d '"' -f 4 | sed 's/^v//')
 
 build:
-	docker build --build-arg base=${base} --build-arg runner_ver=${runner_ver} --build-arg hook_ver=${hook_ver} --build-arg mgc_ver=${mgc_ver} --build-arg runner_dir=${runner_dir} -t ${img} .
+	docker build --build-arg base=${base} --build-arg runner_dir=${runner_dir} -t ${img} .
 
 # start container; dockerd for DinD (isolated; no share for docker.socket)
 # SAMPLE: make startContainerWithDockerd   rTarget=     GH_PAT_RUNNER=

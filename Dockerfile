@@ -8,16 +8,16 @@ FROM ${base}
 ARG base=ubuntu:24.04
 
 
-RUN apt update; apt install -y curl unzip gnupg
+RUN apt update; apt install -y curl unzip gnupg jq yq
 
 # starts: github actions self-host runner >>>>>>>>>>>>>>>
 ARG runner_dir=/opt/gh-action-runner
 WORKDIR ${runner_dir}
 
-ARG runner_ver=2.326.0
-RUN curl -L https://github.com/actions/runner/releases/download/v${runner_ver}/actions-runner-linux-x64-${runner_ver}.tar.gz  -o /tmp/actions-runner.tgz;
-ARG hook_ver=0.7.0
-RUN curl -L https://github.com/actions/runner-container-hooks/releases/download/v${hook_ver}/actions-runner-hooks-docker-${hook_ver}.zip -o /tmp/runner-container-hooks.zip
+# download latest version of actions/runner, actions/runner-container-hooks
+RUN curl -sL https://api.github.com/repos/actions/runner/releases/latest | jq -r '.assets[].browser_download_url' | grep linux-x64 | grep tar.gz | xargs -I {} curl -L {} -o /tmp/actions-runner.tgz
+RUN curl -sL https://api.github.com/repos/actions/runner-container-hooks/releases/latest |  jq -r '.assets[].browser_download_url' | grep hooks-docker | grep zip | xargs -I {} curl -L {} -o  /tmp/runner-container-hooks.zip
+
 RUN tar zxvf /tmp/actions-runner.tgz; \
     unzip /tmp/runner-container-hooks.zip -d ${runner_dir}/runner-container-hooks-docker; \
     rm -f /tmp/actions-runner.tgz /tmp/runner-container-hooks.zip
@@ -44,14 +44,13 @@ RUN apt update; apt install -y docker-ce docker-ce-cli containerd.io docker-buil
 #    gh
 RUN curl -L https://cli.github.com/packages/githubcli-archive-keyring.gpg | apt-key add -; \
     echo "deb https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list; 
-#    msgraph
-ARG msgc_ver=1.9.0
-RUN curl -L https://github.com/microsoftgraph/msgraph-cli/releases/download/v${msgc_ver}/msgraph-cli-linux-x64-${msgc_ver}.tar.gz -o /tmp/msgcli.tgz; \
+#    download latest version of msgraph
+RUN curl -sL https://api.github.com/repos/microsoftgraph/msgraph-cli/releases/latest |  jq -r '.assets[].browser_download_url' | grep linux-x64 | grep tar.gz | xargs -I {} echo curl -L {} -o /tmp/msgcli.tgz; \
     tar zxvf /tmp/msgcli.tgz -C /usr/local/bin ; rm -f  /tmp/msgcli.tgz
 #    azure-cli; https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
-RUN apt update; apt install -y jq yq gh git make expect parallel        bash-completion sudo vim 
+RUN apt update; apt install -y gh git make expect parallel        bash-completion sudo vim
 # ends: other runner capability
 
 # user for runner
