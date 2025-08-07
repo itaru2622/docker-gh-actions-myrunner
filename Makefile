@@ -2,6 +2,7 @@ SHELL  =/bin/bash
 img   ?=itaru2622/gh-actions-myrunner:ubuntu24.04
 base  ?=ubuntu:24.04
 cName ?=gh-action-runner
+pull  ?=missing
 
 # personal access token for gh login, neeeded to onDemand exection outside github actions
 GH_PAT_RUNNER ?=changeme
@@ -53,7 +54,7 @@ build:
 # SAMPLE: make startContainerWithDockerd   rTarget=     GH_PAT_RUNNER=
 #       -e ACTIONS_RUNNER_HOOK_JOB_STARTED=/work/hooks/job-started.sh -e ACTIONS_RUNNER_HOOK_JOB_COMPLETED=/work/hooks/job-completed.sh
 startContainerWithDockerd:
-	docker run --name ${cName} --hostname ${cName} -d --restart always --privileged \
+	docker run --name ${cName} --hostname ${cName} -d --restart always --privileged --pull ${pull} \
 	-e ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT=${ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT} \
 	-e RUNNER_ALLOW_RUNASROOT=${RUNNER_ALLOW_RUNASROOT} \
 	-e GH_PAT_RUNNER=${GH_PAT_RUNNER} \
@@ -65,7 +66,7 @@ startContainerWithDockerd:
 # SAMPLE: make startContainer  rTarget=     GH_PAT_RUNNER=
 #       -e ACTIONS_RUNNER_HOOK_JOB_STARTED=/work/hooks/job-started.sh -e ACTIONS_RUNNER_HOOK_JOB_COMPLETED=/work/hooks/job-completed.sh
 startContainer:
-	docker run --name ${cName} --hostname ${cName} -d --restart always \
+	docker run --name ${cName} --hostname ${cName} -d --restart always --pull ${pull} \
 	-e ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT=${ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT} \
 	-e RUNNER_ALLOW_RUNASROOT=${RUNNER_ALLOW_RUNASROOT} \
 	-e GH_PAT_RUNNER=${GH_PAT_RUNNER} \
