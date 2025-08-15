@@ -34,7 +34,7 @@ RUN mkdir -p ${RUNNER_TOOL_CACHE}
 # ends: github actions self-host runner <<<<<<<<<<<<<<<
 
 # starts: runner capability (docker in docker) >>>>
-RUN curl -L https://download.docker.com/linux/ubuntu/gpg  | apt-key add -; \
+RUN curl -L https://download.docker.com/linux/ubuntu/gpg > /etc/apt/trusted.gpg.d/docker.asc; \
     echo "deb [arch=$(dpkg --print-architecture) ] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
     tee -a /etc/apt/sources.list.d/docker.list;
 RUN apt update; apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin; 
@@ -42,7 +42,7 @@ RUN apt update; apt install -y docker-ce docker-ce-cli containerd.io docker-buil
 
 # starts: other runner capability
 #    gh
-RUN curl -L https://cli.github.com/packages/githubcli-archive-keyring.gpg | apt-key add -; \
+RUN curl -L https://cli.github.com/packages/githubcli-archive-keyring.gpg > /etc/apt/trusted.gpg.d/github-cli.gpg ;\
     echo "deb https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list; 
 #    download latest version of msgraph
 RUN curl -L https://api.github.com/repos/microsoftgraph/msgraph-cli/releases/latest |  jq -r '.assets[].browser_download_url' | grep linux-x64 | grep tar.gz | xargs -I {} echo curl -L {} -o /tmp/msgcli.tgz; \
