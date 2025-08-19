@@ -63,7 +63,7 @@ RUN deluser  --remove-home --remove-all-files ubuntu; delgroup ubuntu; \
     (cd /etc/skel; find . -type f -print | tar cf - -T - | tar xvf - -C/home/${uname} ) ; \
     echo "${uname} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/local-user; \
     echo "Defaults env_keep += \"DEBIAN_FRONTEND\"" >> /etc/sudoers; \
-    mkdir -p /home/${uname}/.ssh ;\
+    mkdir -p /home/${uname}/.ssh  /home/${uname}/.config ;\
     echo "set mouse-=a" > /home/${uname}/.vimrc; \
     chown -R ${uname}:${uname} /home/${uname} ${runner_dir} ${RUNNER_TOOL_CACHE}
 USER ${uname}
