@@ -35,6 +35,8 @@ rAPI    ?=/${rScope}/${rTarget}/actions/runners
 RUNNER_ALLOW_RUNASROOT ?=false
 ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT ?=1
 
+runnerConfigOps ?=--no-default-labels --disableupdate --unattended --ephemeral
+
 # dirs
 wDir       ?=$(shell pwd)
 runner_dir ?=/opt/gh-action-runner
@@ -89,8 +91,8 @@ bash:
 bootRunner: config _runFG unconfig
 bootRunnerDinD:: _startDiD _waitforDockerd bootRunner _cleanupDiD
 
-_startDiD: /var/run/docker.sock
-/var/run/docker.sock:
+/var/run/docker.sock: _startDiD
+_startDiD:
 	sudo /usr/bin/dockerd &
 _waitforDockerd:
 	sleep 3
@@ -128,7 +130,7 @@ config:: login
 config::
 	$(eval url=${rURL})
 	$(eval token=$(shell gh api --method POST ${rAPI}/registration-token | jq -r '.token'))
-	(cd ${runner_dir}; config.sh --url ${url} --token ${token} --replace --name ${rName} --labels ${label} --runnergroup ${rGroup} --no-default-labels --disableupdate --unattended --ephemeral )
+	(cd ${runner_dir}; config.sh --url ${url} --token ${token} --replace --name ${rName} --labels ${label} --runnergroup ${rGroup}  ${runnerConfigOps} )
 	-(cd ${runner_dir}; sudo ./svc.sh install runner )
 config:: logout
 
