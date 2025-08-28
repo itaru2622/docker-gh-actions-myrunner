@@ -37,7 +37,8 @@ RUN mkdir -p ${RUNNER_TOOL_CACHE}
 RUN curl -L https://download.docker.com/linux/ubuntu/gpg > /etc/apt/trusted.gpg.d/docker.asc; \
     echo "deb [arch=$(dpkg --print-architecture) ] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
     tee -a /etc/apt/sources.list.d/docker.list;
-RUN apt update; apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin; 
+RUN apt update; apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin  kmod    iproute2 iptables;
+ENV DOCKER_DRIVER=vfs
 # ends: runner capability (docker in docker) >>>>
 
 # starts: other runner capability
