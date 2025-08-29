@@ -15,7 +15,9 @@ catch() {
 }
 
 sDir=$(dirname $0)
-echo "cDir: ${sDir}-----------------------"
+touch ${sDir}/status.job-running
+
+echo "sDir: ${sDir}-----------------------"
 #-------------------
 for s in `ls ${sDir}/scripts.d/*-pre*.sh | sort -f`
 do
