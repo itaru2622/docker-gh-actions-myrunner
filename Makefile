@@ -145,9 +145,9 @@ unconfig:: logout
 _runsvc:
 	(cd ${runner_dir}; sudo ./svc.sh start )
 _run:
-	(cd ${runner_dir}; ./run.sh --ephemeral & )
+	(cd ${runner_dir}; ./run.sh & )
 _runFG:
-	(cd ${runner_dir}; ./run.sh --ephemeral )
+	(cd ${runner_dir}; ./run.sh )
 _fakeDaemon:
 	tail -f /dev/null
 
