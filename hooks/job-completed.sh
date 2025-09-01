@@ -10,7 +10,7 @@ _me=$0
 # exit 0 always even some error found, to passthrough steps...
 trap catch ERR
 catch() {
-  echo "Trap ERR ${_me} ! But exit 0 for run job"
+  echo "Trap ERR ${_me} ! But exit 0 for run job" 1>&2
   exit 0
 }
 
