@@ -14,8 +14,8 @@ catch() {
   exit 0
 }
 
+touch ${STATUS_JOB_RUNNING}
 sDir=$(dirname $0)
-touch ${sDir}/status.job-running
 
 echo "sDir: ${sDir}-----------------------"
 #-------------------

@@ -10,7 +10,7 @@
 sDir=$(dirname $0)
 
 skip=0
-if [ -e ${sDir}/status.job-running ]; then
+if [ -e ${STATUS_JOB_RUNNING} ]; then
    skip=1
 fi
 exit ${skip}

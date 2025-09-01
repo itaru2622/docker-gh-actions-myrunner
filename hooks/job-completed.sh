@@ -14,8 +14,8 @@ catch() {
   exit 0
 }
 
+rm -f ${STATUS_JOB_RUNNING}
 sDir=$(dirname $0)
-rm -f ${sDir}/status.job-running
 
 echo "sDir: ${sDir}-----------------------"
 for s in `ls ${sDir}/scripts.d/*-post*.sh |  sort -f`
