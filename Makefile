@@ -31,11 +31,11 @@ endif
 rScope  ?=orgs
 rURL    ?=https://github.com/${rTarget}
 rAPI    ?=/${rScope}/${rTarget}/actions/runners
+rConfigOpts ?=--no-default-labels --disableupdate --unattended --ephemeral
 
 RUNNER_ALLOW_RUNASROOT ?=false
 ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT ?=1
 
-runnerConfigOps ?=--no-default-labels --disableupdate --unattended --ephemeral
 
 # dirs
 wDir       ?=$(shell pwd)
@@ -60,7 +60,7 @@ startContainerWithDockerd:
 	-e ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT=${ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT} \
 	-e RUNNER_ALLOW_RUNASROOT=${RUNNER_ALLOW_RUNASROOT} \
 	-e GH_PAT_RUNNER=${GH_PAT_RUNNER} \
-	-e rTarget=${rTarget} -e rScope=${rScope} -e rName=${rName} -e label=${label} -e rGroup=${rGroup} -e rURL=${rURL} -e rAPI=${rAPI} \
+	-e rTarget=${rTarget} -e rScope=${rScope} -e rName=${rName} -e label=${label} -e rGroup=${rGroup} -e rURL=${rURL} -e rAPI=${rAPI} -e rConfigOpts=${rConfigOpts} \
 	-v ${wDir}:/work:ro -w /work \
 	${img} make bootRunnerDinD
 
@@ -72,7 +72,7 @@ startContainer:
 	-e ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT=${ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT} \
 	-e RUNNER_ALLOW_RUNASROOT=${RUNNER_ALLOW_RUNASROOT} \
 	-e GH_PAT_RUNNER=${GH_PAT_RUNNER} \
-	-e rTarget=${rTarget} -e rScope=${rScope} -e rName=${rName} -e label=${label} -e rGroup=${rGroup} -e rURL=${rURL} -e rAPI=${rAPI} \
+	-e rTarget=${rTarget} -e rScope=${rScope} -e rName=${rName} -e label=${label} -e rGroup=${rGroup} -e rURL=${rURL} -e rAPI=${rAPI} -e rConfigOpts=${rConfigOpts} \
         -v ${wDir}:/work:ro -w /work \
         ${img} ${cmd}
 
@@ -130,7 +130,7 @@ config:: login
 config::
 	$(eval url=${rURL})
 	$(eval token=$(shell gh api --method POST ${rAPI}/registration-token | jq -r '.token'))
-	(cd ${runner_dir}; config.sh --url ${url} --token ${token} --replace --name ${rName} --labels ${label} --runnergroup ${rGroup}  ${runnerConfigOps} )
+	(cd ${runner_dir}; config.sh --url ${url} --token ${token} --replace --name ${rName} --labels ${label} --runnergroup ${rGroup}  ${rConfigOpts} )
 	-(cd ${runner_dir}; sudo ./svc.sh install runner )
 config:: logout
 
