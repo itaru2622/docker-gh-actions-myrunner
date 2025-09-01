@@ -54,6 +54,7 @@ RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 RUN apt update; apt install -y gh git make expect parallel        bash-completion sudo vim
 # ends: other runner capability
 
+
 # user for runner
 ARG uid=1000
 ARG uname=runner
@@ -69,7 +70,7 @@ RUN deluser  --remove-home --remove-all-files ubuntu; delgroup ubuntu; \
     chown -R ${uname}:${uname} /home/${uname} ${runner_dir} ${RUNNER_TOOL_CACHE} /run/gh-runner
 USER ${uname}
 
-COPY . /work
+COPY --chown=${uname}:${uname} . /work
 WORKDIR /work
 
 ENV ACTIONS_RUNNER_HOOK_JOB_STARTED=/work/hooks/job-started.sh
