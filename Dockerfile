@@ -76,3 +76,4 @@ WORKDIR /work
 ENV ACTIONS_RUNNER_HOOK_JOB_STARTED=/work/hooks/job-started.sh
 ENV ACTIONS_RUNNER_HOOK_JOB_COMPLETED=/work/hooks/job-completed.sh
 ENV STATUS_JOB_RUNNING=/run/gh-runner/status.job-running
+ENV runner_dir=${runner_dir}
