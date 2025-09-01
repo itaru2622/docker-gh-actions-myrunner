@@ -9,8 +9,13 @@
 
 sDir=$(dirname $0)
 
-skip=0
 if [ -e ${STATUS_JOB_RUNNING} ]; then
-   skip=1
+# do not update image while running.
+   exit 1
 fi
-exit ${skip}
+
+# going to update container image
+
+# make container unregiter from github.
+make unconfig -C ${sDir}/..
+exit 0
