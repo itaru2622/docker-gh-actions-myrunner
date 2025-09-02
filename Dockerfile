@@ -64,11 +64,16 @@ RUN deluser  --remove-home --remove-all-files ubuntu; delgroup ubuntu; \
     usermod  -aG docker ${uname} ; \
     (cd /etc/skel; find . -type f -print | tar cf - -T - | tar xvf - -C/home/${uname} ) ; \
     echo "${uname} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/local-user; \
-    echo "Defaults env_keep += \"DEBIAN_FRONTEND\"" >> /etc/sudoers; \
     mkdir -p /home/${uname}/.ssh  /home/${uname}/.config /run/gh-runner;\
     echo "set mouse-=a" > /home/${uname}/.vimrc; \
     chown -R ${uname}:${uname} /home/${uname} ${runner_dir} ${RUNNER_TOOL_CACHE} /run/gh-runner
-USER ${uname}
+#USER ${uname}
+
+# do not pass PAT to runner account
+RUN { \
+      echo 'Defaults env_delete += "GH_PAT_RUNNER GH_PAT_* *_PAT PAT_*"'; \
+      echo 'Defaults env_keep += "DEBIAN_FRONTEND"' ; \
+    } > /etc/sudoers.d/adjust-envs
 
 COPY --chown=${uname}:${uname} . /work
 WORKDIR /work

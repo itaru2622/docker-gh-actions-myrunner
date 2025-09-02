@@ -93,7 +93,7 @@ bootRunnerDinD:: _startDiD _waitforDockerd bootRunner _cleanupDiD
 
 /var/run/docker.sock: _startDiD
 _startDiD:
-	sudo /usr/bin/dockerd &
+	/usr/bin/dockerd &
 _waitforDockerd:
 	sleep 3
 	${wDir}/waitforDockerd.sh
@@ -130,7 +130,7 @@ config:: login
 config::
 	$(eval url=${rURL})
 	$(eval token=$(shell gh api --method POST ${rAPI}/registration-token | jq -r '.token'))
-	(cd ${runner_dir}; config.sh --url ${url} --token ${token} --replace --name ${rName} --labels ${label} --runnergroup ${rGroup}  ${rConfigOpts} )
+	(cd ${runner_dir}; sudo -EH -u runner ./config.sh --url ${url} --token ${token} --replace --name ${rName} --labels ${label} --runnergroup ${rGroup}  ${rConfigOpts} )
 	-(cd ${runner_dir}; sudo ./svc.sh install runner )
 config:: logout
 
@@ -139,7 +139,7 @@ unconfig:: login
 unconfig::
 	-(cd ${runner_dir}; sudo ./svc.sh uninstall; rm -f ./svc.sh )
 	$(eval token=$(shell gh api --method POST ${rAPI}/remove-token | jq -r '.token'))
-	(cd ${runner_dir}; ./config.sh remove --token ${token} )
+	(cd ${runner_dir}; sudo -EH -u runner ./config.sh remove --token ${token} )
 unconfig:: logout
 
 _runsvc:
@@ -147,7 +147,7 @@ _runsvc:
 _run:
 	(cd ${runner_dir}; ./run.sh & )
 _runFG:
-	(cd ${runner_dir}; ./run.sh )
+	(cd ${runner_dir}; sudo -EH -u runner ./run.sh )
 _fakeDaemon:
 	tail -f /dev/null
 
