@@ -44,11 +44,6 @@ runner_dir ?=/opt/gh-action-runner
 
 cmd ?=make bootRunner
 
-# tool versions(tags) to use
-runner_ver ?=$(shell curl -sL https://api.github.com/repos/actions/runner/releases/latest                 | grep tag_name | cut -d '"' -f 4 | sed 's/^v//')
-hook_ver   ?=$(shell curl -sL https://api.github.com/repos/actions/runner-container-hooks/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/^v//')
-mgc_ver    ?=$(shell curl -sL https://api.github.com/repos/microsoftgraph/msgraph-cli/releases/latest     | grep tag_name | cut -d '"' -f 4 | sed 's/^v//')
-
 build:
 	docker build --build-arg base=${base} --build-arg runner_dir=${runner_dir} -t ${img} .
 
@@ -105,8 +100,6 @@ _cleanupDiD:
 	-docker network prune -f
 	-sudo pkill -f /usr/bin/dockerd
 	-sudo rm -f /var/run/docker.pid /var/run/docker.sock
-	sync
-	sleep 2
 
 # gh login/logout
 # SAMPLE: make login
@@ -118,12 +111,10 @@ logout:
 	-gh auth logout
 
 # SAMPLE: make runnerStart
-runnerStart: config _run
-#runnerStart: config _runsvc
+runnerStart: config _runFG
 
 # SAMPLE: make runnerStop
 runnerStop:  unconfig _kill 
-#runnerStop: unconfig _killsvc 
 
 # SAMPLE: make config
 config:: login
@@ -131,27 +122,16 @@ config::
 	$(eval url=${rURL})
 	$(eval token=$(shell gh api --method POST ${rAPI}/registration-token | jq -r '.token'))
 	(cd ${runner_dir}; sudo -EH -u runner ./config.sh --url ${url} --token ${token} --replace --name ${rName} --labels ${label} --runnergroup ${rGroup}  ${rConfigOpts} )
-	-(cd ${runner_dir}; sudo ./svc.sh install runner )
 config:: logout
 
 # SAMPLE: make unconfig
 unconfig:: login
 unconfig::
-	-(cd ${runner_dir}; sudo ./svc.sh uninstall; rm -f ./svc.sh )
 	$(eval token=$(shell gh api --method POST ${rAPI}/remove-token | jq -r '.token'))
 	(cd ${runner_dir}; sudo -EH -u runner ./config.sh remove --token ${token} )
 unconfig:: logout
 
-_runsvc:
-	(cd ${runner_dir}; sudo ./svc.sh start )
-_run:
-	(cd ${runner_dir}; ./run.sh & )
 _runFG:
 	(cd ${runner_dir}; sudo -EH -u runner ./run.sh )
-_fakeDaemon:
-	tail -f /dev/null
-
-_killsvc:
-	-(cd ${runner_dir}; sudo ./svc.sh stop )
 _kill:
 	-pkill -f ${runner_dir}/bin/Runner.Listener	
