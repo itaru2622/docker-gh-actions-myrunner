@@ -46,7 +46,7 @@ ENV DOCKER_DRIVER=vfs
 RUN curl -L https://cli.github.com/packages/githubcli-archive-keyring.gpg > /etc/apt/trusted.gpg.d/github-cli.gpg ;\
     echo "deb https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list; 
 #    download latest version of msgraph
-RUN curl -L https://api.github.com/repos/microsoftgraph/msgraph-cli/releases/latest |  jq -r '.assets[].browser_download_url' | grep linux-x64 | grep tar.gz | xargs -I {} echo curl -L {} -o /tmp/msgcli.tgz; \
+RUN curl -L https://api.github.com/repos/microsoftgraph/msgraph-cli/releases/latest |  jq -r '.assets[].browser_download_url' | grep linux-x64 | grep tar.gz | xargs -I {} curl -L {} -o /tmp/msgcli.tgz; \
     tar zxvf /tmp/msgcli.tgz -C /usr/local/bin ; rm -f  /tmp/msgcli.tgz
 #    azure-cli; https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
