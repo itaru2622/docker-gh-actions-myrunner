@@ -21,7 +21,7 @@ make build
 
 2a) start container, then configure and starts runner process at once.
 ```bash
-make startContainer rTarget=ORG/REPO GH_PAT=your_GITHUB_PersonalAccessToken
+make startContainer rTarget=ORG/REPO GH_PAT_RUNNER=your_GITHUB_PersonalAccessToken
 ```
 
 2b) start container with dockerd, required to make runner support docker tasks.
@@ -30,14 +30,14 @@ this usecase is under developing, yet.
 
 ```bash
 # boot container with dockerd
-make startContainerWithDockerd rTarget=ORG/REPO GH_PAT=your_GITHUB_PAT
+make startContainerWithDockerd rTarget=ORG/REPO GH_PAT_RUNNER=your_GITHUB_PAT
 ```
 
 2c) start step-by-step for debug
 
 ```bash
 # start container (at host)
-make startContainer rTarget=ORG/REPO GH_PAT=your_GITHUB_PersonalAccessToken cmd='tail -f /dev/null'
+make startContainer rTarget=ORG/REPO GH_PAT_RUNNER=your_GITHUB_PersonalAccessToken cmd='tail -f /dev/null'
 
 # ops in container /work folder >>>>>>>>>>
 # start dockerd (optional)
