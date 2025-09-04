@@ -71,7 +71,7 @@ RUN deluser  --remove-home --remove-all-files ubuntu; delgroup ubuntu; \
 
 # do not pass PAT to runner account
 RUN { \
-      echo 'Defaults env_delete += "GH_PAT_RUNNER GH_PAT_* *_PAT PAT_*"'; \
+      echo 'Defaults env_delete += "GH_PAT_RUNNER RUNNER_CFG_PAT GH_PAT_* *_PAT PAT_*"'; \
       echo 'Defaults env_keep += "DEBIAN_FRONTEND"' ; \
     } > /etc/sudoers.d/adjust-envs
 
