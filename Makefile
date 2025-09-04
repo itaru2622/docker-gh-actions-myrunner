@@ -50,7 +50,9 @@ wDir       ?=$(shell pwd)
 runner_dir ?=/opt/gh-action-runner
 
 
-cmd ?=make bootRunner
+# cmd: what to do in container (boot.sh catches signal(INT|TERM) and unconfig runner from github.com )
+cmd ?=boot.sh make bootRunner -C /work
+cmd ?=boot.sh make bootRunnerDinD -C /work
 
 build:
 	docker build --build-arg base=${base} --build-arg runner_dir=${runner_dir} -t ${img} .
@@ -66,7 +68,7 @@ startContainerWithDockerd:
 	-e rTarget=${rTarget} -e rScope=${rScope} -e rName=${rName} -e label=${label} -e rGroup=${rGroup} -e rURL=${rURL} -e rAPI=${rAPI} -e rConfigOpts="${rConfigOpts}" \
 	-v /etc/resolv.conf:/etc/resolv.conf:ro \
 	-v ${wDir}:/work:ro -w /work \
-	${img} make bootRunnerDinD
+	${img} ${cmd}
 
 # start container; without dockerd
 # SAMPLE: make startContainer  rTarget=     GH_PAT_RUNNER=
@@ -92,15 +94,15 @@ bash:
 
 # ops within runner container: >>>>>>>
 
-bootRunner: config _runFG unconfig
-bootRunnerDinD:: _startDiD _waitforDockerd bootRunner _cleanupDiD
+bootRunner: login config logout _runFG login2 unconfig logout
+bootRunnerDinD: _startDiD _waitforDockerd bootRunner _cleanupDiD
 
 /var/run/docker.sock: _startDiD
 _startDiD:
 	/usr/bin/dockerd &
 _waitforDockerd:
 	sleep 3
-	${wDir}/waitforDockerd.sh
+	waitforDockerd.sh
 _cleanupDiD:
 	-docker ps -qa | xargs docker rm -f
 	-docker images -qa | xargs docker rmi -f
@@ -112,34 +114,28 @@ _cleanupDiD:
 
 # gh login/logout
 # SAMPLE: make login
-login:
-	@echo ${GH_PAT_RUNNER} | gh auth login --with-token
+login login2:
+	@(echo ${GH_PAT_RUNNER} | gh auth login --with-token )
 	-gh auth status
 # SAMPLE: make logout
 logout:
 	-gh auth logout
 
-# SAMPLE: make runnerStart
-runnerStart: config _runFG
-
-# SAMPLE: make runnerStop
-runnerStop:  unconfig _kill 
-
 # SAMPLE: make config
-config:: login
-config::
+#  require login
+config:
 	$(eval url=${rURL})
 	$(eval token=$(shell gh api --method POST ${rAPI}/registration-token | jq -r '.token'))
 	(cd ${runner_dir}; sudo -EH -u runner ./config.sh --url ${url} --token ${token} --replace --name ${rName} --labels ${label} --runnergroup ${rGroup}  ${rConfigOpts} )
-config:: logout
 
 # SAMPLE: make unconfig
-unconfig:: login
-unconfig::
+#  require login|login2
+unconfig:
 	$(eval token=$(shell gh api --method POST ${rAPI}/remove-token | jq -r '.token'))
 	(cd ${runner_dir}; sudo -EH -u runner ./config.sh remove --token ${token} )
-unconfig:: logout
 
+# SAMPLE: make _run
+#  require config
 _runFG:
 	(cd ${runner_dir}; sudo -EH -u runner ./run.sh )
 _kill:
