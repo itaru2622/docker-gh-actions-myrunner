@@ -8,12 +8,20 @@ pull  ?=missing
 GH_PAT_RUNNER ?=changeme
 
 # params for configure.sh, registering this runner into github.
-#   rName: runner Name to register github.
-rName  ?=selfhost-ubuntu-24.04-amd64
 #   label: labels to register github for this runner instance.
 label  ?=amd64,ubuntu-24.04,ubuntu-latest,Linux,X64,self-hosted
 #   rGroup: runner group, to make this runner instance belong
 rGroup ?=Default
+#   rName: runner Name to register github.
+rName  ?=selfhost-ubuntu-24.04-amd64
+
+# ajust rName, replace @@HOSTNAME@@ to hostname, as scaling consideration(replicas) to fix below gaps:
+#  @github: each runner instance needs to be config.sh with unique name(--name ${rName}) to work.
+#  @replica with docker-compose: it cannot specify replica's hostname before boot
+#  then, it needs to adjust at runtime.
+ifeq (@@HOSTNAME@@,$(findstring @@HOSTNAME@@,$(rName)))
+override rName:=$(subst @@HOSTNAME@@,$(shell hostname),$(rName))
+endif
 
 # rTarget: org|repo which this runner works for, and its scope(rScope).
 #     rTarget   <=> rScope
