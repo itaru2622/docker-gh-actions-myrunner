@@ -17,5 +17,5 @@ fi
 # going to update container image
 
 # make container unregiter from github.
-make unconfig -C ${sDir}/..
+make login unconfig logout -C ${sDir}/..
 exit 0
