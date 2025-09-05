@@ -94,7 +94,7 @@ bash:
 
 # ops within runner container: >>>>>>>
 
-bootRunner: login config logout _runFG login2 unconfig logout
+bootRunner: toolcache login config logout _runFG login2 unconfig logout
 bootRunnerDinD: _startDiD _waitforDockerd bootRunner _cleanupDiD
 
 /var/run/docker.sock: _startDiD
@@ -111,6 +111,14 @@ _cleanupDiD:
 	-docker network prune -f
 	-sudo pkill -f /usr/bin/dockerd
 	-sudo rm -f /var/run/docker.pid /var/run/docker.sock
+
+# cares volume mount for RUNNER_TOOL_CACHE... single space for multiple runner instances(replicas/containers)...
+#   docker logical volume is created for root(uid:0),  but want to use runner account...
+toolcache:
+	if [ -n "$${RUNNER_TOOL_CACHE}" ] ; then \
+	    mkdir -p $${RUNNER_TOOL_CACHE}; \
+	    chown runner:runner $${RUNNER_TOOL_CACHE}; \
+	fi
 
 # gh login/logout
 # SAMPLE: make login
