@@ -26,7 +26,7 @@ ENV  ACTIONS_RUNNER_CONTAINER_HOOKS=${runner_dir}/runner-container-hooks-docker/
 ENV  PATH=${PATH}:${runner_dir}/bin:${runner_dir}
 # cf. https://github.com/actions/runner/blob/main/images/Dockerfile
 ENV  RUNNER_MANUALLY_TRAP_SIG=1
-#ENV  ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT=1
+ENV  ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT=1
 # cf. toolcache https://i-beam.org/2024/05/25/github-actions-tool-cache/
 ENV  RUNNER_TOOL_CACHE=/opt/hostedtoolcache
 RUN mkdir -p ${RUNNER_TOOL_CACHE}
