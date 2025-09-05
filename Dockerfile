@@ -62,10 +62,10 @@ RUN deluser  --remove-home --remove-all-files ubuntu; delgroup ubuntu; \
     addgroup --system --gid ${uid} ${uname} ; \
     adduser  --disabled-password --system --gid ${uid} --uid ${uid} --shell /bin/bash --home /home/${uname} ${uname} ; \
     usermod  -aG docker ${uname} ; \
-    (cd /etc/skel; find . -type f -print | tar cf - -T - | tar xvf - -C/home/${uname} ) ; \
     echo "${uname} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/local-user; \
-    mkdir -p /home/${uname}/.ssh  /home/${uname}/.config /home/${uname}/.cache /run/gh-runner;\
+    (cd /etc/skel; find . -type f -print | tar cf - -T - | tar xvf - -C/home/${uname} ) ; \
     echo "set mouse-=a" > /home/${uname}/.vimrc; \
+    mkdir -p /home/${uname}/.ssh  /home/${uname}/.config /home/${uname}/.cache /run/gh-runner;\
     chown -R ${uname}:${uname} /home/${uname} ${runner_dir} ${RUNNER_TOOL_CACHE} /run/gh-runner
 #USER ${uname}
 
