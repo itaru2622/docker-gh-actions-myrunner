@@ -10,7 +10,9 @@ while ! docker ps -qa >/dev/null && ((waited_sec < max_time_wait)); do
         sleep 1
         ((waited_sec=waited_sec+1))
         if ((waited_sec >= max_time_wait)); then
+            ps auwx
+            cat /var/run/docker.pid
             exit 1
         fi
-    done
-    exit 0
+done
+exit 0
