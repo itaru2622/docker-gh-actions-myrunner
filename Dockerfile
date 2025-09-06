@@ -84,4 +84,4 @@ ENV STATUS_JOB_RUNNING=/run/gh-runner/status.job-running
 ENV runner_dir=${runner_dir}
 ENV PATH=/work:${PATH}
 
-VOLUME [ ${RUNNER_TOOL_CACHE} ]
+VOLUME ${RUNNER_TOOL_CACHE}
