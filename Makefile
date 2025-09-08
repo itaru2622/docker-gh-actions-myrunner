@@ -49,6 +49,8 @@ ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT ?=1
 wDir       ?=$(shell pwd)
 runner_dir ?=/opt/gh-action-runner
 
+# keep some seconds for container management...
+WAIT_MAINTAIN_TEST ?=10
 
 # cmd: what to do in container (boot.sh catches signal(INT|TERM) and unconfig runner from github.com )
 cmd ?=boot.sh make bootRunner -C /work
@@ -141,6 +143,7 @@ config:
 unconfig:
 	$(eval token=$(shell gh api --method POST ${rAPI}/remove-token | jq -r '.token'))
 	(cd ${runner_dir}; sudo -EH -u runner ./config.sh remove --token ${token} )
+	sleep ${WAIT_MAINTAIN_TEST}
 
 # SAMPLE: make _run
 #  require config
