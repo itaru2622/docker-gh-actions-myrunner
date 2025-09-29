@@ -16,13 +16,18 @@ WORKDIR ${runner_dir}
 
 # download latest version of actions/runner, actions/runner-container-hooks
 RUN curl -L https://api.github.com/repos/actions/runner/releases/latest | jq -r '.assets[].browser_download_url' | grep linux-x64 | grep tar.gz | xargs -I {} curl -L {} -o /tmp/actions-runner.tgz
-RUN curl -L https://api.github.com/repos/actions/runner-container-hooks/releases/latest |  jq -r '.assets[].browser_download_url' | grep hooks-docker | grep zip | xargs -I {} curl -L {} -o  /tmp/runner-container-hooks.zip
+RUN curl -L https://api.github.com/repos/actions/runner-container-hooks/releases/latest |  jq -r '.assets[].browser_download_url' | grep hooks-docker | grep zip | xargs -I {} curl -L {} -o  /tmp/runner-container-hooks-docker.zip
+RUN curl -L https://api.github.com/repos/actions/runner-container-hooks/releases/latest |  jq -r '.assets[].browser_download_url' | grep hooks-k8s | grep zip | xargs -I {} curl -L {} -o  /tmp/runner-container-hooks-k8s.zip
+
 
 RUN tar zxvf /tmp/actions-runner.tgz; \
-    unzip /tmp/runner-container-hooks.zip -d ${runner_dir}/runner-container-hooks-docker; \
-    rm -f /tmp/actions-runner.tgz /tmp/runner-container-hooks.zip
+    unzip /tmp/runner-container-hooks-docker.zip -d ${runner_dir}/runner-container-hooks-docker; \
+    unzip /tmp/runner-container-hooks-k8s.zip    -d ${runner_dir}/runner-container-hooks-k8s; \
+    rm -f /tmp/actions-runner.tgz /tmp/runner-container-hooks-*.zip
 
 ENV  ACTIONS_RUNNER_CONTAINER_HOOKS=${runner_dir}/runner-container-hooks-docker/index.js
+#ENV  ACTIONS_RUNNER_CONTAINER_HOOKS=${runner_dir}/runner-container-hooks-k8s/index.js
+
 ENV  PATH=${PATH}:${runner_dir}/bin:${runner_dir}
 # cf. https://github.com/actions/runner/blob/main/images/Dockerfile
 ENV  RUNNER_MANUALLY_TRAP_SIG=1
@@ -52,7 +57,7 @@ RUN curl -L https://api.github.com/repos/microsoftgraph/msgraph-cli/releases/lat
 #    azure-cli; https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
-RUN apt update; apt install -y gh git make expect parallel        bash-completion sudo vim
+RUN apt update; apt install -y gh git make expect parallel        bash-completion sudo vim dumb-init
 # ends: other runner capability
 
 
